@@ -4,7 +4,6 @@ import tushare as ts
 import pandas as pd
 import datetime
 import math
-import mysql.connector
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
@@ -83,8 +82,8 @@ df1 = df1.reset_index(drop=True)
 
 
 #设置模型超参数
-num_steps = 5
-timeperiod_window_size = 2
+num_steps = 7
+timeperiod_window_size = 1
 num_features = 8
 input_shape = (None, num_steps, timeperiod_window_size, num_features)
 
@@ -136,7 +135,8 @@ from keras.callbacks import ModelCheckpoint,EarlyStopping
 
 model = Sequential()
 model.add(Conv2D(filters=1, kernel_size=(timeperiod_window_size,num_features), strides=(timeperiod_window_size,num_features),
-                 padding='valid', data_format='channels_first', input_shape=(1,num_steps*timeperiod_window_size,num_features)))
+                 padding='valid', data_format='channels_first', activation='tanh', use_bias=False,
+                 input_shape=(1,num_steps*timeperiod_window_size,num_features)))
 model.add(Reshape((num_steps,1)))
 cells = [LSTMCell(lstm_units),LSTMCell(lstm_units)]
 model.add(RNN(cells,return_sequences=True))
@@ -153,4 +153,7 @@ earlystopping = EarlyStopping(monitor='val_loss', patience=100)
 model.fit(trainning_features, trainning_targets,batch_size=5,
           epochs=6000,validation_data=(validation_features, validation_targets), callbacks=[checkpointer,earlystopping])
 score = model.evaluate(test_features, test_targets, batch_size=1)
-print(np.sqrt(score))
+print('test loss percent: {:.4%}'.format(math.sqrt(score)))
+
+#显示卷积层的各个影响因素的权重
+print(model.get_weights()[0])
