@@ -132,10 +132,11 @@ from keras.layers import Conv2D,Dense,LSTM,ConvLSTM2D,Reshape,LSTMCell,RNN,Flatt
 from keras.models import Sequential
 from keras import losses,optimizers,metrics
 from keras.callbacks import ModelCheckpoint,EarlyStopping
+from keras.constraints import non_neg
 
 model = Sequential()
 model.add(Conv2D(filters=1, kernel_size=(timeperiod_window_size,num_features), strides=(timeperiod_window_size,num_features),
-                 padding='valid', data_format='channels_first', activation='tanh', use_bias=False,
+                 padding='valid', data_format='channels_first', activation='tanh', use_bias=False,kernel_constraint=non_neg(),
                  input_shape=(1,num_steps*timeperiod_window_size,num_features)))
 model.add(Reshape((num_steps,1)))
 cells = [LSTMCell(lstm_units),LSTMCell(lstm_units)]
